@@ -4,20 +4,50 @@ import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 
 public class MainActivity extends ActionBarActivity {
+
+    private boolean serviceStarted = false;
+    private WifiEventsReceiver wifiEventsReceiver = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        Button btn = (Button) findViewById(R.id.button_StartService);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (serviceStarted) {
+                    unregisterReceiver (wifiEventsReceiver);
+                    ((Button)view).setText ("Start Service");
+                }
+                else {
+                    registerService();
+                    ((Button)view).setText ("Stop  Service");
+                }
+
+                serviceStarted = !serviceStarted;
+            }
+        });
+    }
+
+
+    private void registerService()
+    {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(WifiManager.SUPPLICANT_CONNECTION_CHANGE_ACTION);
-        registerReceiver(new WifiEventsReceiver(), intentFilter);
+        wifiEventsReceiver = new WifiEventsReceiver();
+        registerReceiver(wifiEventsReceiver, intentFilter);
     }
 
 
